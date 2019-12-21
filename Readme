@@ -1,0 +1,23 @@
+1、现在本地创建一个mysql数据库，修改好密码123456，并修改root登录地址的权限
+    MySQL -uroot -p初始密码
+    SET PASSWORD FOR 'root'@'localhost' = PASSWORD('123456');
+
+    use mysql;
+    select username, host from user;
+    修改一个root的host为：%
+
+2、创建一个数据库guest
+    CREATE DATABASE guest CHARACTER SET utf8;
+
+3、修改../guest/settings.py 文件中修改数据库相关配置
+
+4、在.../guest/__init__.py 目录下添加，让当前的 Django 通过 PyMySQL 来连接 MySQL 数据库
+    import pymysql
+    pymysql.install_as_MySQLdb()
+
+
+5、进行数据库同步，使数据模型重新在 MySQL 数据库中生成表
+    python manage.py migrate
+
+6、重新创建Admin 后台超级管理员账号（admin/admin123456）
+    python manage.py createsuperuser
