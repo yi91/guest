@@ -14,7 +14,7 @@ def index_bak(request):
 
 
 def index(request):
-    return render(request, "index.template_pages")
+    return render(request, "index.html")
 
 
 # 登录动作
@@ -34,7 +34,7 @@ def login_action(request):
 
             return response
         else:
-            return render(request, 'index.template_pages', {'error': 'username or password error!'})
+            return render(request, 'index.html', {'error': 'username or password error!'})
 
 
 '''
@@ -50,7 +50,7 @@ def login_action(request):
             # 换一种写法，对路径进行重定向
             return HttpResponseRedirect('/event_manage/')
         else:
-            return render(request, 'index.template_pages', {'error': 'username or password error!'})
+            return render(request, 'index.html', {'error': 'username or password error!'})
 '''
 
 
@@ -65,7 +65,7 @@ def event_manage(request):
     # 查询所有发布会对象
     event_list = Event.objects.all()
 
-    return render(request, "event_manage.template_pages", {"user": username, "events": event_list})
+    return render(request, "event_manage.html", {"user": username, "events": event_list})
 
 
 # 发布会名称搜索
@@ -74,7 +74,7 @@ def search_name(request):
     username = request.session.get('user', '')
     name_search = request.GET.get("name", "")
     event_list = Event.objects.filter(name__contains=name_search)
-    return render(request, "event_manage.template_pages", {"user": username, "events": event_list})
+    return render(request, "event_manage.html", {"user": username, "events": event_list})
 
 
 # 嘉宾管理
@@ -95,7 +95,7 @@ def guest_manage(request):
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         contacts = paginator.page(paginator.num_pages)
-    return render(request, "guest_manage.template_pages", {"user": username, "guests": contacts})
+    return render(request, "guest_manage.html", {"user": username, "guests": contacts})
 
 
 # 嘉宾手机号搜索
@@ -119,14 +119,14 @@ def search_phone(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         contacts = paginator.page(paginator.num_pages)
 
-    return render(request, "guest_manage.template_pages", {"phone": phone, "guests": contacts})
+    return render(request, "guest_manage.html", {"phone": phone, "guests": contacts})
 
 
 # 签到页面
 @login_required
 def sign_index(request, event_id):
     event = get_object_or_404(Event, id=event_id)
-    return render(request, 'sign_index.template_pages', {'event': event})
+    return render(request, 'sign_index.html', {'event': event})
 
 
 # 签到动作
@@ -138,21 +138,21 @@ def sign_index_action(request, event_id):
     # 判断用户输入的手机号是否存在
     result = Guest.objects.filter(phone=phone)
     if not result:
-        return render(request, 'sign_index.template_pages', {'event': event, 'hint': 'phone error.'})
+        return render(request, 'sign_index.html', {'event': event, 'hint': 'phone error.'})
 
     # 通过手机和发布会 id 两个条件来查询 Guest
     result = Guest.objects.filter(phone=phone, event_id=event_id)
     if not result:
-        return render(request, 'sign_index.template_pages', {'event': event, 'hint': 'eventid or phone error.'})
+        return render(request, 'sign_index.html', {'event': event, 'hint': 'eventid or phone error.'})
 
     # 判断该手机号的签到状态是否为 1
     result = Guest.objects.get(phone=phone, event_id=event_id)
     if result.sign:
-        return render(request, 'sign_index.template_pages', {'event': event, 'hint': "user has sign in."})
+        return render(request, 'sign_index.html', {'event': event, 'hint': "user has sign in."})
     else:
         Guest.objects.filter(phone=phone, event_id=event_id).update(sign='1')
 
-    return render(request, 'sign_index.template_pages', {'event': event, 'hint': 'sign in success!', 'guest': result})
+    return render(request, 'sign_index.html', {'event': event, 'hint': 'sign in success!', 'guest': result})
 
 
 # 取消签到
@@ -166,22 +166,22 @@ def sign_off_action(request, event_id):
     # 第一步判断手机号
     result = Guest.objects.filter(phone=phone)
     if not result:
-        return render(request, 'sign_index.template_pages',
+        return render(request, 'sign_index.html',
                       {'user': username, 'event': event, '提示2': '该手机号不存在！', 'guests': guest_list})
     # 第二步判断手机号和发布会的唯一性
     result = Guest.objects.filter(phone=phone, event_id=event_id)
     if not result:
-        return render(request, 'sign_index.template_pages',
+        return render(request, 'sign_index.html',
                       {'user': username, 'event': event, '提示2': '该用户未参加此次发布会！', 'guests': guest_list})
     # 第三步判断是否重复签到
     result = Guest.objects.get(phone=phone, event_id=event_id)
     if not result.sign:
-        return render(request, 'sign_index.template_pages',
+        return render(request, 'sign_index.html',
                       {'user': username, 'event': event, '提示2': '该手机号尚未签到！', 'guests': guest_list})
 
     else:
         Guest.objects.filter(phone=phone, event_id=event_id).update(sign='0')
-        return render(request, 'sign_index.template_pages',
+        return render(request, 'sign_index.html',
                       {'user': username, 'event': event, '提示2': '取消签到成功！', 'guest2': result, 'guests': guest_list})
 
 
