@@ -10,14 +10,14 @@ from sign.models import Event
 def user_auth(request):
     """ 用户认证 """
 
-    # 本次 HTTP 请求的 Header 信息，得到的数据是这样的：YWRtaW46YWRtaW4xMjM0NTY=
+    # 本次 HTTP 请求的 Header 信息，得到的数据是这样的：Basic YWRtaW46YWRtaW4xMjM0NTY=
     get_http_auth = request.META.get('HTTP_AUTHORIZATION', b'')
     # 拆分后的数据是这样的：['Basic', 'YWRtaW46YWRtaW4xMjM0NTY=']
     auth = get_http_auth.split()
 
     try:
         # 取出 list 中的加密串，通过 base64 对加密串进行解码得到的数据是：('admin', ':', 'admin123456')
-        auth_parts = base64.b64decode(auth[0]).decode('utf-8').partition(':')
+        auth_parts = base64.b64decode(auth[1]).decode('utf-8').partition(':')
     except IndexError:
         return "null"
 
