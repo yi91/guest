@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
+from django.urls import re_path, include
 from django.contrib import admin
 from sign import views
 
@@ -21,19 +21,19 @@ from sign import views
 
 # 添加index/路径配置
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^index/$', views.index),
-    url(r'^index_bak/$', views.index_bak),
-    url(r'^login_action/$', views.login_action),
-    url(r'^event_manage/$', views.event_manage),
-    url(r'^accounts/login/$', views.index),
-    url(r'^search_name/$', views.search_name),
-    url(r'^search_phone/$', views.search_phone),
-    url(r'^guest_manage/$', views.guest_manage),
-    url(r'^sign_index/(?P<event_id>[0-9]+)/$', views.sign_index),
-    url(r'^sign_index_action/(?P<event_id>[0-9]+)/$', views.sign_index_action),
-    url(r'^sign_off_action/(?P<event_id>[0-9]+)/$', views.sign_off_action),
-    url(r'^logout/$', views.logout),
+    re_path(r'^admin/', admin.site.urls),
+    re_path(r'^index/$', views.index),
+    re_path(r'^index_bak/$', views.index_bak),
+    re_path(r'^login_action/$', views.login_action),
+    re_path(r'^event_manage/$', views.event_manage),
+    re_path(r'^accounts/login/$', views.index),
+    re_path(r'^search_name/$', views.search_name),
+    re_path(r'^search_phone/$', views.search_phone),
+    re_path(r'^guest_manage/$', views.guest_manage),
+    re_path(r'^sign_index/(?P<event_id>[0-9]+)/$', views.sign_index),
+    re_path(r'^sign_index_action/(?P<event_id>[0-9]+)/$', views.sign_index_action),
+    re_path(r'^sign_off_action/(?P<event_id>[0-9]+)/$', views.sign_off_action),
+    re_path(r'^logout/$', views.logout),
     # 配置接口的二级路径
-    url(r'^api/', include('sign.urls', namespace="sign")),
+    re_path(r'^api/', include('sign.urls', namespace="sign")),
 ]
