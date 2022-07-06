@@ -2,6 +2,8 @@
 import os
 import sys
 
+
+# 项目管理器
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "guest.settings")
     try:
