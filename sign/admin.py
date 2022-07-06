@@ -2,7 +2,7 @@ from django.contrib import admin
 from sign.models import Guest, Event
 
 
-# 当前应用的后台管理系统配置
+# admin后台管理系统配置
 class EventAdmin(admin.ModelAdmin):
     # 定义要在列表中显示哪些字段
     list_display = ['name', 'status', 'start_time', 'id']
