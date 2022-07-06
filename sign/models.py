@@ -1,12 +1,14 @@
 from django.db import models
 
 
+# 数据模型模块
 # Create your models here.
 # 发布会表
 class Event(models.Model):
+    objects = models.Manager()
     # 发布会标题
     name = models.CharField(max_length=100)
-    #  参加人数
+    # 参加人数最大限制
     limit = models.IntegerField()
     #  状态
     status = models.BooleanField()
@@ -23,10 +25,11 @@ class Event(models.Model):
 
 # 嘉宾表
 class Guest(models.Model):
-    # 关联发布会id
-    event = models.ForeignKey(Event)
+    objects = models.Manager()
+    # 关联发布会id, on_delete设置主表删除连带从表数据
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
     # 姓名
-    realname = models.CharField(max_length=64)
+    realname = models.CharField(max_length=100)
     # 手机号
     phone = models.CharField(max_length=16)
     # 邮箱
