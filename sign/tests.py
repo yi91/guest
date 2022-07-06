@@ -8,7 +8,7 @@ from django.test import TestCase, Client
 
 
 # Create your tests here.
-
+# 自动化测试模块
 # 数据库的测试，测试发布会和嘉宾模型
 class ModelTest(TestCase):
 
