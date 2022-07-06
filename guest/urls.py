@@ -22,11 +22,12 @@ from sign import views
 # 添加index/路径配置
 urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
+    re_path(r'^$', views.index),
     re_path(r'^index/$', views.index),
+    re_path(r'^accounts/login/$', views.index),
     re_path(r'^index_bak/$', views.index_bak),
     re_path(r'^login_action/$', views.login_action),
     re_path(r'^event_manage/$', views.event_manage),
-    re_path(r'^accounts/login/$', views.index),
     re_path(r'^search_name/$', views.search_name),
     re_path(r'^search_phone/$', views.search_phone),
     re_path(r'^guest_manage/$', views.guest_manage),
