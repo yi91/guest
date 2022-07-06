@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class SignConfig(AppConfig):
+class BlogConfig(AppConfig):
     name = 'sign'
