@@ -17,6 +17,7 @@
 
 
 5、进行数据库同步，使数据模型重新在 MySQL 数据库中生成表
+    python manage.py makemigrations sign
     python manage.py migrate
 
 6、重新创建Admin 后台超级管理员账号（admin/admin123456）
