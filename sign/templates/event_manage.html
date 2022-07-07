@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <!-- 通过 class 属性来设置 HTML 标签的样式 -->
     {% load bootstrap3 %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
-    <title>Guest Manage</title>
+    <meta charset="UTF-8">
 </head>
+
 <body role="document">
+<title>Event Manage</title>
 <!-- 导航栏 -->
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
@@ -32,7 +35,7 @@
     <div id="navbar2" class="navbar-collapse collapse">
         <form class="navbar-form" method="get" action="/search_name/">
             <div class="form-group">
-                <input name="name" type="text" placeholder="名称" class="form-control">
+                <input name="name" type="text" placeholder="event" class="form-control">
             </div>
             <button type="submit" class="btn btn-success">搜索</button>
         </form>
@@ -47,10 +50,11 @@
             <thead>
             <tr>
                 <th>id</th>
-                <th>名称</th>
+                <th>event</th>
                 <th>状态</th>
                 <th>地址</th>
                 <th>时间</th>
+                <th>签到</th>
             </tr>
             </thead>
             <tbody>
@@ -69,6 +73,20 @@
             </tbody>
         </table>
     </div>
+</div>
+<!-- 列表分页器 -->
+<div class="pagination">
+    <span class="step-links">
+     {% if events.has_previous %}
+         <a href="?page={{ events.previous_page_number }}">previous</a>
+     {% endif %}
+        <span class="current"> 　
+        Page {{ events.number }} of {{ events.paginator.num_pages }}.
+        </span>
+        {% if events.has_next %}
+            <a href="?page={{ events.next_page_number }}">next</a>
+        {% endif %}
+    </span>
 </div>
 </body>
 

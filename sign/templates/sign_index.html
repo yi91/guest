@@ -8,7 +8,9 @@
     <title>Guest Manage</title>
 </head>
 <body role="document">
-
+<title>
+    {{ event.name }}
+</title>
 <!-- 导航栏 -->
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
@@ -20,6 +22,14 @@
                 <!-- 设置发布会与嘉宾导航链接 -->
                 <li><a href="/event_manage/">发布会</a></li>
                 <li><a href="/guest_manage/">嘉宾</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="#">{{user}}</a>
+                </li>
+                <li>
+                    <a href="/logout/">退出</a>
+                </li>
             </ul>
         </div>
     </div>
@@ -33,6 +43,7 @@
                 <input name="phone" type="text" placeholder="输入手机号" class="form-control">
             </div>
             <button type="submit" class="btn btn-success">签到</button>
+
             <!-- 增加签到成功的提示信息 -->
             <font color="red">
                 <br>{{ hint }}
@@ -47,15 +58,41 @@
             </div>
             <button type="submit" class="btn btn-success">取消</button>
             <!-- 增加取消签到的提示信息 -->
-            <font color="red">
-                <br>{{ 提示2 }}
-                <br>{{ guest2.realname }}
-                <br>{{ guest2.phone }}
-            </font>
+            <p style="color:red">
+                <br>{{ hint0 }}
+            </p>
         </form>
     </div>
 </div>
-
+<!-- 已签到列表 -->
+<div class="row" style="padding-top: 0px;">
+    <div class="col-md-6">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>guest</th>
+                <th>手机</th>
+                <th>Email</th>
+                <th>签到</th>
+                <th>发布会</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for guest in guests %}
+            <tr>
+                <td>{{ guest.id }}</td>
+                <td>{{ guest.realname }}</td>
+                <td>{{ guest.phone }}</td>
+                <td>{{ guest.email }}</td>
+                <td>{{ guest.sign }}</td>
+                <td>{{ guest.event }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 </body>
 
 </html>

@@ -35,16 +35,24 @@ def add_event(request):
         return JsonResponse({'status': 10023, 'message': 'event name 已经存在'})
 
     # 5、如果id和name都没问题，就准备插入数据
-    if status == '':
+    if status != '1' and status != '0':
         status = 1
 
-    try:
-        Event.objects.create(id=eid, name=name, limit=limit, address=address, status=int(status),
-                             start_time=start_time)
+        try:
+            Event.objects.create(id=eid, name=name, limit=limit, address=address, status=int(status),
+                                 start_time=start_time)
 
-    except ValidationError as e:
-        error = 'start_time格式化错误，请检查'
-        return JsonResponse({'status': 10024, 'message': error})
+        except ValidationError as e:
+            error = 'start_time格式化错误，请检查'
+            return JsonResponse({'status': 10024, 'message': error})
+
+    else:
+        try:
+            Event.objects.create(id=eid, name=name, limit=limit, status=int(status),
+                                 address=address, start_time=start_time)
+        except ObjectDoesNotExist:
+            error = 'start_time格式错误，时间格式必须是YYYY-MM-DD HH:MM:SS'
+            return JsonResponse({'status': '10024', 'massage': error})
 
     # 6、如果都没问题，就插入成功
     return JsonResponse({'status': 200, 'message': '添加发布会成功'})

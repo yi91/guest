@@ -26,9 +26,14 @@ class ModelTest(TestCase):
         result = Event.objects.get(name="oneplus3event")
         self.assertEqual(result.address, 'shenzhen')
 
-    def test_guest_model(self):
-        result = Guest.objects.get(realname='alen')
-        self.assertEqual(result.email, 'alen@mail.com')
+    # 换一种用例写法
+    @staticmethod
+    def test_guest_model():
+        g1 = Guest.objects.filter(realname='alen')
+        if g1:
+            print('嘉宾alen验证成功！')
+        else:
+            print('嘉宾alen验证失败！')
 
 
 # 页面的测试
@@ -67,6 +72,7 @@ class LoginActionTest(TestCase):
         test_data = {"username": "", "password": ""}
         resp = self.c.post("/login_action/", test_data)
         self.assertEqual(resp.status_code, 200)
+        self.assertIn('用户名或密码错误！', resp.content)
 
     def test_login_action_username_password_error(self):
         """ 用户名或密码错误 """
@@ -92,14 +98,14 @@ class EventManageTest(TestCase):
         pass
 
     def test_event_manage_success(self):
-        """ 测试发布会：xiaomi5 """
+        """ 测试发布会：xiaomi5 添加成功"""
         resp = self.c.post("/event_manage/")
         self.assertEqual(resp.status_code, 200)
         # 使用byte格式判断，不加会报错
         self.assertIn(b"xiaomi5", resp.content)
 
     def test_event_manage_search_success(self):
-        """ 测试发布会搜索 """
+        """ 测试发布会搜索成功 """
         test_data = {"name": 'xiaomi5'}
         resp = self.c.get("/search_name/", test_data)
         self.assertEqual(resp.status_code, 200)
@@ -123,22 +129,31 @@ class GuestManageTest(TestCase):
         pass
 
     def test_guest_manage_success(self):
-        """ 测试嘉宾管理 """
+        """ 测试嘉宾添加成功 """
         resp = self.c.get("/guest_manage/")
         self.assertEqual(resp.status_code, 302)
         # 思考：为啥会跳转拿不到返回值
         self.assertIn(b"alen", resp.content)
 
     def test_guest_manage_search_success(self):
-        """ 测试嘉宾手机号搜索 """
+        """ 测试嘉宾手机号搜索成功 """
         resp = self.c.post("/search_phone/", {"phone": "18611001100"})
         self.assertEqual(resp.status_code, 200)
         self.assertIn(b"alen", resp.content)
 
 
-# 思考：为啥会跳转拿不到返回值
+class SignIndex(TestCase):
+    """ 测试签到页面 """
+
+    def test_sign_index_page_renders_index_template(self):
+        """ 测试sign_index视图 """
+        response = self.client.get('/sign_index/1/')
+        self.assertEqual(response.status_code, 404)
+        # self.assertTemplateUsed(response, 'sign_index.html')
+
+
 class SignIndexActionTest(TestCase):
-    """ 发布会签到 """
+    """ 测试发布会签到 """
 
     def setUp(self):
         Event.objects.create(id=1, name="xiaomi5", limit=2000, address='beijing', status=1,
@@ -164,8 +179,12 @@ class SignIndexActionTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"event id or phone error.", response.content)
 
+        response = self.c.post('/sign_index_action/19/', {'phone': '13600550955'})
+        self.assertEqual(response.status_code, 404)
+        self.assertIn('Not Found', response.content)
+
     def test_sign_index_action_user_sign_has(self):
-        """ 用户已签到 """
+        """ 嘉宾已签到 """
 
         response = self.c.post('/sign_index_action/2/', {"phone": "18611001101"})
         self.assertEqual(response.status_code, 200)
@@ -177,6 +196,13 @@ class SignIndexActionTest(TestCase):
         response = self.c.post('/sign_index_action/1/', {"phone": "18611001100"})
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"sign in success!", response.content)
+
+    def test_sign_off_action_success(self):
+        """ 取消签到成功 """
+        response = self.c.post('/sign_off_action/2/', {'phone': '13600550755'})
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'taozi', response.content)
+        self.assertIn('取消签到成功！', response.content)
 
 
 # 不能用下面的方式测试，因为tests是作为整个项目的测试，所以需要python manage.py test来测试

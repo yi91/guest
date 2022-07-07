@@ -19,7 +19,7 @@ from sign import views
 
 # 导入sign应用views文件
 
-# 添加index/路径配置
+# 添加index/路径配置，供web页面使用
 urlpatterns = [
     re_path(r'^admin/', admin.site.urls),
     re_path(r'^$', views.index),
@@ -36,5 +36,5 @@ urlpatterns = [
     re_path(r'^sign_off_action/(?P<event_id>[0-9]+)/$', views.sign_off_action),
     re_path(r'^logout/$', views.logout),
     # 配置接口的二级路径
-    re_path(r'^api/', include('sign.urls', namespace="sign")),
+    re_path(r'^api/', include(('sign.urls', 'sign'), namespace="sign")),
 ]

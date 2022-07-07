@@ -5,7 +5,7 @@ from sign.models import Guest, Event
 # admin后台管理系统配置
 class EventAdmin(admin.ModelAdmin):
     # 定义要在列表中显示哪些字段
-    list_display = ['name', 'status', 'start_time', 'id']
+    list_display = ['id', 'name', 'status', 'start_time']
     # 搜索栏
     search_fields = ['name']
     # 过滤器
@@ -13,7 +13,7 @@ class EventAdmin(admin.ModelAdmin):
 
 
 class GuestAdmin(admin.ModelAdmin):
-    list_display = ['realname', 'phone', 'email', 'sign', 'create_time', 'event']
+    list_display = ['id', 'realname', 'phone', 'sign', 'event', 'email', 'create_time']
     # 搜索栏
     search_fields = ['realname', 'phone']
     # 过滤器

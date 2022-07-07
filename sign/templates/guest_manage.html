@@ -13,7 +13,7 @@
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
         <div class="navbar-header">
-            <a class="navbar-brand" href="/event_manage/">Guest Manage System</a>
+            <a class="navbar-brand" href="/guest_manage/">Guest Manage System</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
@@ -47,7 +47,7 @@
             <thead>
             <tr>
                 <th>id</th>
-                <th>名称</th>
+                <th>guest</th>
                 <th>手机</th>
                 <th>Email</th>
                 <th>签到</th>
@@ -76,8 +76,9 @@
         {% if guests.has_previous %}
         <a href="?page={{ guests.previous_page_number }}">previous</a>
         {% endif %}
-        <span class="current">
-        Page {{ guests.number }} of {{ guests.paginator.num_pages }}. </span>
+
+        <span class="current">Page {{ guests.number }} of {{ guests.paginator.num_pages }}.</span>
+
         {% if guests.has_next %}
         <a href="?page={{ guests.next_page_number }}">next</a>
         {% endif %}

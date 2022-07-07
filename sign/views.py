@@ -17,7 +17,7 @@ def index(request):
     return render(request, "index.html")
 
 
-# 登录动作
+# 登录动作（前台浏览器）
 def login_action(request):
     if request.method == 'POST':
         username = request.POST.get('username', '')
@@ -26,15 +26,17 @@ def login_action(request):
         # 启用Django 认证登录
         user = auth.authenticate(username=username, password=password)
         if user is not None:
-            auth.login(request, user)
             # 登录
-            request.session['user'] = username
+            auth.login(request, user)
             # 将session信息记录到浏览器
+            request.session['user'] = username
+            # 页面重定向到发布会页面
             response = HttpResponseRedirect('/event_manage/')
-
             return response
         else:
             return render(request, 'index.html', {'error': 'username or password error!'})
+    else:
+        return render(request, 'index.html', {'error': 'username or password error!'})
 
 
 '''
@@ -54,7 +56,7 @@ def login_action(request):
 '''
 
 
-# 发布会管理
+# 发布会管理（后台服务器）
 # @login_required
 def event_manage(request):
     # 读取浏览器cookie
@@ -62,18 +64,31 @@ def event_manage(request):
 
     # 读取浏览器 session
     username = request.session.get('user', '')
-    # 查询所有发布会对象
-    event_list = Event.objects.all()
+    # 查询所有发布会对象，并按id升序
+    event_list = Event.objects.all().order_by('id')
 
-    return render(request, "event_manage.html", {"user": username, "events": event_list})
+    # 分页
+    paginator = Paginator(event_list, 3)
+    page_num = request.GET.get('page')
+    try:
+        contacts = paginator.page(page_num)
+    except PageNotAnInteger:
+        # 如果页面不是整数，默认跳转第一页
+        contacts = paginator.page(1)
+    except EmptyPage:
+        # 如果页面超过9999，默认跳转最后一页
+        contacts = paginator.page(paginator.num_pages)
+
+    return render(request, "event_manage.html", {"user": username, "events": contacts})
 
 
 # 发布会名称搜索
 # @login_required
 def search_name(request):
     username = request.session.get('user', '')
-    name_search = request.GET.get("name", "")
-    event_list = Event.objects.filter(name__contains=name_search)
+    search_text = request.GET.get("name", "")
+    event_list = Event.objects.filter(name__contains=search_text)
+
     return render(request, "event_manage.html", {"user": username, "events": event_list})
 
 
@@ -81,12 +96,11 @@ def search_name(request):
 @login_required
 def guest_manage(request):
     username = request.session.get('user', '')
-    guest_list = Guest.objects.all()
+    guest_list = Guest.objects.all().order_by('id')
 
     # 添加分页器的代码
-    paginator = Paginator(guest_list, 5)
+    paginator = Paginator(guest_list, 3)
     page = request.GET.get('page')
-
     try:
         contacts = paginator.page(page)
     except PageNotAnInteger:
@@ -95,6 +109,7 @@ def guest_manage(request):
     except EmptyPage:
         # If page is out of range (e.g. 9999), deliver last page of results.
         contacts = paginator.page(paginator.num_pages)
+
     return render(request, "guest_manage.html", {"user": username, "guests": contacts})
 
 
@@ -109,7 +124,6 @@ def search_phone(request):
     # 添加分页器的代码
     paginator = Paginator(guest_list, 5)
     page = request.GET.get('page')
-
     try:
         contacts = paginator.page(page)
     except PageNotAnInteger:
@@ -125,8 +139,14 @@ def search_phone(request):
 # 签到页面
 @login_required
 def sign_index(request, event_id):
+    # 读取浏览器session
+    username = request.session.get('user', '')
+
     event = get_object_or_404(Event, id=event_id)
-    return render(request, 'sign_index.html', {'event': event})
+    # 获取所有已签到嘉宾信息给前端展示
+    guest_list = Guest.objects.filter(event_id=event_id, sign='1').order_by('id')
+
+    return render(request, 'sign_index.html', {'user': username, 'event': event, 'guests': guest_list})
 
 
 # 签到动作
@@ -138,56 +158,48 @@ def sign_index_action(request, event_id):
     # 判断用户输入的手机号是否存在
     result = Guest.objects.filter(phone=phone)
     if not result:
-        return render(request, 'sign_index.html', {'event': event, 'hint': 'phone error.'})
+        return render(request, 'sign_index.html', {'event': event, 'hint': '手机号 %s 不存在，请检查！' % phone})
 
     # 通过手机和发布会 id 两个条件来查询 Guest
     result = Guest.objects.filter(phone=phone, event_id=event_id)
     if not result:
-        return render(request, 'sign_index.html', {'event': event, 'hint': 'eventid or phone error.'})
+        return render(request, 'sign_index.html', {'event': event, 'hint': '该嘉宾未参加此次发布会，请检查！'})
 
-    # 判断该手机号的签到状态是否为 1
+    # 判断该手机号的签到状态，1 代表已签到，0 代表未签到，
     result = Guest.objects.get(phone=phone, event_id=event_id)
     if result.sign:
-        return render(request, 'sign_index.html', {'event': event, 'hint': "user has sign in."})
+        return render(request, 'sign_index.html', {'event': event, 'hint': "嘉宾已签到，无需重复签到。"})
     else:
         Guest.objects.filter(phone=phone, event_id=event_id).update(sign='1')
-
-    return render(request, 'sign_index.html', {'event': event, 'hint': 'sign in success!', 'guest': result})
+        return render(request, 'sign_index.html', {'event': event, 'hint': '签到成功！', 'guest': result})
 
 
 # 取消签到
 @login_required()
 def sign_off_action(request, event_id):
-    # 读取浏览器session
-    username = request.session.get('user', '')
-    event = get_object_or_404(Event, id=event_id)
     phone = request.POST.get('phone', '')
-    guest_list = Guest.objects.filter(event_id=event_id, sign='1').order_by('id')
+
     # 第一步判断手机号
     result = Guest.objects.filter(phone=phone)
     if not result:
-        return render(request, 'sign_index.html',
-                      {'user': username, 'event': event, '提示2': '该手机号不存在！', 'guests': guest_list})
+        # 因为sign_index页面会自动获取user和event信息，所以下面不再重复写
+        return render(request, 'sign_index.html', {'hint0': '该手机号 %s 不存在！' % phone})
     # 第二步判断手机号和发布会的唯一性
     result = Guest.objects.filter(phone=phone, event_id=event_id)
     if not result:
-        return render(request, 'sign_index.html',
-                      {'user': username, 'event': event, '提示2': '该用户未参加此次发布会！', 'guests': guest_list})
-    # 第三步判断是否重复签到
+        return render(request, 'sign_index.html', {'hint0': '该嘉宾未参加此次发布会！'})
+    # 第三步判断是否已取消签到
     result = Guest.objects.get(phone=phone, event_id=event_id)
-    if not result.sign:
-        return render(request, 'sign_index.html',
-                      {'user': username, 'event': event, '提示2': '该手机号尚未签到！', 'guests': guest_list})
-
-    else:
+    if result.sign:
         Guest.objects.filter(phone=phone, event_id=event_id).update(sign='0')
-        return render(request, 'sign_index.html',
-                      {'user': username, 'event': event, '提示2': '取消签到成功！', 'guest2': result, 'guests': guest_list})
+        return render(request, 'sign_index.html', {'hint0': '取消签到成功！手机号 %s' % phone})
+    else:
+        return render(request, 'sign_index.html', {'hint0': '该手机号 %s 未签到，无需取消！' % phone})
 
 
 # 退出登录
 @login_required
 def logout(request):
-    auth.logout(request)  # 退出登录
+    auth.logout(request)
     response = HttpResponseRedirect('/index/')
     return response

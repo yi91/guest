@@ -37,5 +37,8 @@ class Migration(migrations.Migration):
                 ('create_time', models.DateTimeField(auto_now=True)),
                 ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='sign.Event')),
             ],
+            options={
+                'unique_together': {('event', 'phone')},
+            },
         ),
     ]
