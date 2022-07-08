@@ -26,7 +26,7 @@ class ModelTest(TestCase):
         result = Event.objects.get(name="oneplus3event")
         self.assertEqual(result.address, 'shenzhen')
 
-    # 换一种用例写法
+    # 换一种断言写法
     @staticmethod
     def test_guest_model():
         g1 = Guest.objects.filter(realname='alen')

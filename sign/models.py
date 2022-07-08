@@ -26,7 +26,7 @@ class Event(models.Model):
 # 嘉宾表
 class Guest(models.Model):
     objects = models.Manager()
-    # 关联发布会id, on_delete设置主表删除连带从表数据
+    # 关联发布会id, on_delete设置主表删除连带从表数据，Guest.objects.filter()用eid查询时，括号内无论用event还是event_id都不会错
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     # 姓名
     realname = models.CharField(max_length=100)

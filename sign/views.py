@@ -166,11 +166,10 @@ def sign_index_action(request, event_id):
         return render(request, 'sign_index.html', {'event': event, 'hint': '该嘉宾未参加此次发布会，请检查！'})
 
     # 判断该手机号的签到状态，1 代表已签到，0 代表未签到，
-    result = Guest.objects.get(phone=phone, event_id=event_id)
     if result.sign:
         return render(request, 'sign_index.html', {'event': event, 'hint': "嘉宾已签到，无需重复签到。"})
     else:
-        Guest.objects.filter(phone=phone, event_id=event_id).update(sign='1')
+        result.update(sign='1')
         return render(request, 'sign_index.html', {'event': event, 'hint': '签到成功！', 'guest': result})
 
 
@@ -189,9 +188,8 @@ def sign_off_action(request, event_id):
     if not result:
         return render(request, 'sign_index.html', {'hint0': '该嘉宾未参加此次发布会！'})
     # 第三步判断是否已取消签到
-    result = Guest.objects.get(phone=phone, event_id=event_id)
     if result.sign:
-        Guest.objects.filter(phone=phone, event_id=event_id).update(sign='0')
+        result.update(sign='0')
         return render(request, 'sign_index.html', {'hint0': '取消签到成功！手机号 %s' % phone})
     else:
         return render(request, 'sign_index.html', {'hint0': '该手机号 %s 未签到，无需取消！' % phone})
