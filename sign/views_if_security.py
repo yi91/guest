@@ -9,7 +9,7 @@ from sign.models import Event
 
 
 def user_sign(request):
-    """ 用户签名+时间戳 """
+    """ md5用户签名+时间戳 """
 
     client_time = request.POST.get('time', '')
     client_sign = request.POST.get('sign', '')
@@ -24,7 +24,7 @@ def user_sign(request):
     if time_difference >= 60:
         return "timeout"
 
-    # 服务的的签名检查
+    # 服务器的签名检查
     md5 = hashlib.md5()
     sign_str = client_time + "&Guest-Bugmaster"
 
@@ -40,6 +40,7 @@ def user_sign(request):
 
 
 def add_event(request):
+    # 添加发布会接口---增加md5签名+时间戳
     sign_result = user_sign(request)
     if sign_result == 'sign null':
         return JsonResponse({'status': 10011, 'message': 'user sign null'})
@@ -57,34 +58,38 @@ def add_event(request):
         start_time = request.POST.get('start_time', '')
 
         # 2、判断请求的字段是否符合要求
-        if eid == '' or name == '' or limit == '' or address == '' or start_time == '':
+        if name == '' or limit == '' or address == '':
             return JsonResponse({'status': 10021, 'message': '参数不能为空！'})
 
         # 3、所有参数都正常，先按id执行查询是否已经存在
         result = Event.objects.filter(id=eid)
         # 如果查到了结果
         if result:
-            return JsonResponse({'status': 10022, 'message': 'event id 已经存在了'})
+            return JsonResponse({'status': 10022, 'message': 'event id %s 已经存在了' % eid})
 
         # 4、按名称查询是否存在
         result = Event.objects.filter(name=name)
         if result:
-            return JsonResponse({'status': 10023, 'message': 'event name 已经存在'})
+            return JsonResponse({'status': 10023, 'message': 'event name %s 已经存在' % name})
 
-        # 5、如果id和name都没问题，就准备插入数据
-        if status == '':
-            status = 1
-
-        try:
-            Event.objects.create(id=eid, name=name, limit=limit, address=address, status=int(status),
-                                 start_time=start_time)
-
-        except ValidationError as e:
-            error = 'start_time格式化错误，请检查'
-            return JsonResponse({'status': 10024, 'message': error})
-
-        # 6、如果都没问题，就插入成功
-        return JsonResponse({'status': 200, 'message': '添加发布会成功'})
+        # 5、如果id和name都没问题，就准备插入数据，布尔类型只有两种，false(0，null)或者 true（非0且非null）
+        if status != '0' and status != '':
+            try:
+                Event.objects.create(id=eid, name=name, limit=limit, address=address,
+                                     status=1, start_time=start_time)
+            except ValidationError:
+                error = 'start_time %s 格式错误，请检查' % start_time
+                return JsonResponse({'status': 10024, 'message': error})
+        else:
+            # 待添加的发布会status值为 0
+            try:
+                Event.objects.create(id=eid, name=name, limit=limit, address=address,
+                                     status=0, start_time=start_time)
+            except ValidationError:
+                error = 'start_time %s 格式错误，请检查' % start_time
+                return JsonResponse({'status': 10025, 'message': error})
+        # 一直没报错，最后就是成功
+        return JsonResponse({'status': 200, 'message': 'eid为 %s 的发布会添加成功' % eid})
 
 
 if __name__ == '__main__':

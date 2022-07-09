@@ -68,7 +68,7 @@ def event_manage(request):
     event_list = Event.objects.all().order_by('id')
 
     # 分页
-    paginator = Paginator(event_list, 3)
+    paginator = Paginator(event_list, 5)
     page_num = request.GET.get('page')
     try:
         contacts = paginator.page(page_num)
@@ -99,7 +99,7 @@ def guest_manage(request):
     guest_list = Guest.objects.all().order_by('id')
 
     # 添加分页器的代码
-    paginator = Paginator(guest_list, 3)
+    paginator = Paginator(guest_list, 5)
     page = request.GET.get('page')
     try:
         contacts = paginator.page(page)
