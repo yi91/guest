@@ -39,9 +39,8 @@ class Guest(models.Model):
     # 创建时间（自动获取当前时间）
     create_time = models.DateTimeField(auto_now=True)
 
-
-class Meta:
-    unique_together = ("event", "phone")
+    class Meta:
+        unique_together = ("event", "phone")
 
     def __str__(self):
         return self.realname
