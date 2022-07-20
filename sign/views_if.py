@@ -21,18 +21,21 @@ def add_event(request):
 
     # 2、判断请求的字段是否符合要求
     if eid == '' or name == '' or limit == '' or address == '' or start_time == '':
-        return JsonResponse({'status': 10021, 'message': '所有参数不能为空！'})
+        return JsonResponse({'status': 10021, 'message': '所有参数不能为空！'},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 3、所有参数都正常，先按id执行查询是否已经存在
     result = Event.objects.filter(id=eid)
     # 如果查到了结果
     if result:
-        return JsonResponse({'status': 10022, 'message': 'event id 已经存在了'})
+        return JsonResponse({'status': 10022, 'message': 'event id 已经存在了'},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 4、按名称查询是否存在
     eve = Event.objects.filter(name=name)
     if eve:
-        return JsonResponse({'status': 10023, 'message': 'event name 已经存在'})
+        return JsonResponse({'status': 10023, 'message': 'event name 已经存在'},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 5、如果id和name都没问题，就准备插入数据，布尔类型只有两种，false(0，null)或者 true（非0且非null）
     if status != '0' and status != '':
@@ -42,7 +45,8 @@ def add_event(request):
                                  start_time=start_time)
         except ValidationError:
             error = 'start_time格式化错误，时间格式必须是YYYY-MM-DD HH:MM:SS'
-            return JsonResponse({'status': 10024, 'message': error})
+            return JsonResponse({'status': 10024, 'message': error},
+                                json_dumps_params={"ensure_ascii": False})
     else:
         try:
             # status为 0 的直接插入数据
@@ -50,9 +54,11 @@ def add_event(request):
                                  address=address, start_time=start_time)
         except ValidationError:
             error = 'start_time格式错误，时间格式必须是YYYY-MM-DD HH:MM:SS'
-            return JsonResponse({'status': 10025, 'massage': error})
+            return JsonResponse({'status': 10025, 'massage': error},
+                                json_dumps_params={"ensure_ascii": False})
     # 没报错，最后肯定成功
-    return JsonResponse({'status': 200, 'message': 'eid为 %s 的发布会添加成功' % eid})
+    return JsonResponse({'status': 200, 'message': 'eid为 %s 的发布会添加成功' % eid},
+                        json_dumps_params={"ensure_ascii": False})
 
 
 def get_event_list(request):
@@ -64,7 +70,8 @@ def get_event_list(request):
 
     # 判断参数是否合法
     if eid == '' and name == '':
-        return JsonResponse({'status': 10021, 'message': 'event的id 和 name参数不能都为空'})
+        return JsonResponse({'status': 10021, 'message': 'event的id 和 name参数不能都为空'},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 使用id查询时
     if eid != '':
@@ -74,7 +81,8 @@ def get_event_list(request):
             # get方法需要包裹在try里面
             result = Event.objects.get(id=eid)
         except ObjectDoesNotExist:
-            return JsonResponse({'status': 10022, 'message': '找不到对应id的发布会'})
+            return JsonResponse({'status': 10022, 'message': '找不到对应id的发布会'},
+                                json_dumps_params={"ensure_ascii": False})
         else:
             event['name'] = result.name
             event['limit'] = result.limit
@@ -82,7 +90,8 @@ def get_event_list(request):
             event['address'] = result.address
             event['start_time'] = result.start_time
 
-            return JsonResponse({'status': 200, 'message': '该eid %s 查询发布会成功' % eid, 'data': event})
+            return JsonResponse({'status': 200, 'message': '该eid %s 查询发布会成功' % eid, 'data': event},
+                                json_dumps_params={"ensure_ascii": False})
 
     # 使用name查询时
     if name != '':
@@ -95,9 +104,11 @@ def get_event_list(request):
                 event = {'name': e.name, 'limit': e.limit, 'status': e.status, 'address': e.address,
                          'start_time': e.start_time}
                 datas.append(event)
-            return JsonResponse({'status': 200, 'message': '查询发布会成功', 'data': datas})
+            return JsonResponse({'status': 200, 'message': '查询发布会成功', 'data': datas},
+                                json_dumps_params={"ensure_ascii": False})
         else:
-            return JsonResponse({'status': 10023, 'message': '找不到对应name的发布会'})
+            return JsonResponse({'status': 10023, 'message': '找不到对应name的发布会'},
+                                json_dumps_params={"ensure_ascii": False})
 
 
 def add_guest(request):
@@ -111,23 +122,27 @@ def add_guest(request):
 
     # 2、判断请求的字段是否符合要求
     if eid == '' or realname == '' or phone == '' or email == '':
-        return JsonResponse({'status': 10021, 'message': 'guest所有参数不能为空！'})
+        return JsonResponse({'status': 10021, 'message': 'guest所有参数不能为空！'},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 3、所有参数都正常，先按id执行查询发布会是否已经存在
-    result = Event.objects.filter(id=eid)
+    result = Event.objects.filter(id=eid)[0]
     # 如果查不到结果
     if not result:
-        return JsonResponse({'status': 10022, 'message': '嘉宾参加的发布会不存在'})
+        return JsonResponse({'status': 10022, 'message': '嘉宾参加的发布会不存在'},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 4、存在，判断发布会状态，1 代表发布会可用，0 不可用
     if not result.status:
-        return JsonResponse({'status': 10023, 'message': '嘉宾不允许参加 %s （不可用）' % result.name})
+        return JsonResponse({'status': 10023, 'message': '嘉宾不允许参加 %s （不可用）' % result.name},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 5、id和status都没问题，判断人数限制问题，发布会实际参加人数 < 发布会limit
     guests = Guest.objects.filter(event_id=eid)
 
     if len(guests) >= result.limit:
-        return JsonResponse({'status': 10024, 'message': '发布会人数已达上限 %s ，添加失败' % result.limit})
+        return JsonResponse({'status': 10024, 'message': '发布会人数已达上限 %s ，添加失败' % result.limit},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 6、最后判断当前时间发布会是否已开始
     etime = str(result.start_time).split('.')[0]
@@ -143,17 +158,20 @@ def add_guest(request):
 
     # 6.1、比较两个时间戳的整数部分，如果当前时间超过发布会的开始时间
     if n_time >= e_time:
-        return JsonResponse({'status': 10025, 'message': '该 %s 已经开始或结束，无法参加' % result.name})
+        return JsonResponse({'status': 10025, 'message': '该 %s 已经开始或结束，无法参加' % result.name},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 7、判断手机号是否重复
     try:
         Guest.objects.create(event_id=int(eid), realname=realname, phone=phone, email=email, sign=0)
     # 如果插入报错
     except IntegrityError as e:
-        return JsonResponse({'status': 10026, 'message': '嘉宾的手机号 %s 已经存在' % phone})
+        return JsonResponse({'status': 10026, 'message': '嘉宾的手机号 %s 已经存在' % phone},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 如果都没问题，就插入成功
-    return JsonResponse({'status': 200, 'message': '添加嘉宾成功'})
+    return JsonResponse({'status': 200, 'message': '添加嘉宾成功'},
+                        json_dumps_params={"ensure_ascii": False})
 
 
 def get_guest_list(request):
@@ -165,7 +183,8 @@ def get_guest_list(request):
 
     # 判断参数是否合法
     if eid == '' and phone == '':
-        return JsonResponse({'status': 10021, 'message': '嘉宾查询的eid和phone不能全部为空'})
+        return JsonResponse({'status': 10021, 'message': '嘉宾查询的eid和phone不能全部为空'},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 使用eid查询时
     if eid != '' and phone == '':
@@ -177,9 +196,11 @@ def get_guest_list(request):
                 guest = {'eid': eid, 'realname': re.realname, 'phone': re.phone, 'email': re.email,
                          'sign': re.sign, 'create_time': re.create_time}
                 guests.append(guest)
-            return JsonResponse({'status': 200, 'message': 'eid查询嘉宾成功', 'data': guests})
+            return JsonResponse({'status': 200, 'message': 'eid查询嘉宾成功', 'data': guests},
+                                json_dumps_params={"ensure_ascii": False})
         else:
-            return JsonResponse({'status': 10022, 'message': '该发布会id尚未有嘉宾参加'})
+            return JsonResponse({'status': 10022, 'message': '该发布会id尚未有嘉宾参加'},
+                                json_dumps_params={"ensure_ascii": False})
 
     # 使用phone查询时
     if eid == '' and phone != '':
@@ -187,21 +208,25 @@ def get_guest_list(request):
         try:
             result = Guest.objects.get(phone=phone)
         except ObjectDoesNotExist:
-            return JsonResponse({'status': 10023, 'message': '该手机号所属嘉宾尚未参加任何发布会'})
+            return JsonResponse({'status': 10023, 'message': '该手机号所属嘉宾尚未参加任何发布会'},
+                                json_dumps_params={"ensure_ascii": False})
         else:
             # 查到嘉宾
             for g in result:
                 gue = {'event_id': g.event_id, 'realname': g.realname, 'phone': g.phone, 'email': g.emai,
                        'sign': g.sign, 'create_time': g.create_time}
                 guest.append(gue)
-            return JsonResponse({'status': 200, 'message': '手机号查询嘉宾成功', 'data': guest})
+            return JsonResponse({'status': 200, 'message': '手机号查询嘉宾成功', 'data': guest},
+                                json_dumps_params={"ensure_ascii": False})
 
     # 使用eid和phone一起查询，结果应该只有一条
     result = Guest.objects.filter(event_id=eid, phone=phone)
     if result:
-        return JsonResponse({'status': 200, 'message': 'eid和手机号查询嘉宾成功', 'data': result})
+        return JsonResponse({'status': 200, 'message': 'eid和手机号查询嘉宾成功', 'data': result},
+                            json_dumps_params={"ensure_ascii": False})
     else:
-        return JsonResponse({'status': 10024, 'message': '该eid %s 和手机号 %s 所属嘉宾信息不存在' % (eid, phone)})
+        return JsonResponse({'status': 10024, 'message': '该eid %s 和手机号 %s 所属嘉宾信息不存在' % (eid, phone)},
+                            json_dumps_params={"ensure_ascii": False})
 
 
 def user_sign(request):
@@ -213,17 +238,20 @@ def user_sign(request):
 
     # 签到必须两个字段都存在，因为guest表的event和phone具有唯一性
     if eid == '' or phone == '':
-        return JsonResponse({'status': 10021, 'message': 'eid或者phone不能为空'})
+        return JsonResponse({'status': 10021, 'message': 'eid或者phone不能为空'},
+                            json_dumps_params={"ensure_ascii": False})
 
     # eid和phone都存在时
-    result = Event.objects.filter(id=eid)
+    result = Event.objects.filter(id=eid)[0]
     # 不存在结果
     if not result:
-        return JsonResponse({'status': 10022, 'message': '该发布会eid %s 不存在' % eid})
+        return JsonResponse({'status': 10022, 'message': '该发布会eid %s 不存在' % eid},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 发布会状态不可用
     if not result.status:
-        return JsonResponse({'status': 10023, 'message': '该发布会eid %s 暂不可用' % eid})
+        return JsonResponse({'status': 10023, 'message': '该发布会eid %s 暂不可用' % eid},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 6、最后判断当前时间发布会是否已开始
     etime = str(result.start_time).split('.')[0]
@@ -239,17 +267,21 @@ def user_sign(request):
 
     # 6.1、如果当前时间超过发布会的开始时间
     if n_time >= e_time:
-        return JsonResponse({'status': 10024, 'message': '该 %s 已开始，无法参加' % result.name})
+        return JsonResponse({'status': 10024, 'message': '该 %s 已开始，无法参加' % result.name},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 7、时间满足条件时，检查手机号是否存在
-    g = Guest.objects.filter(event_id=eid, phone=phone)
+    g = Guest.objects.filter(event_id=eid, phone=phone)[0]
     if not g:
-        return JsonResponse({'status': 10025, 'message': '该手机号不存在'})
+        return JsonResponse({'status': 10025, 'message': '该手机号不存在'},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 9、发布会和手机号都没问题的时候，检查是否已经签到过
     if not g.sign:
-        return JsonResponse({'status': 10026, 'message': '该嘉宾已经签到过'})
+        return JsonResponse({'status': 10026, 'message': '该嘉宾已经签到过'},
+                            json_dumps_params={"ensure_ascii": False})
 
     # 如果都没问题，就执行签到，这时候get不会报错，所以不用try
     g.update(sign='1')
-    return JsonResponse({'status': 200, 'message': '嘉宾 %s 签到成功' % g.realname})
+    return JsonResponse({'status': 200, 'message': '嘉宾 %s 签到成功' % g.realname},
+                        json_dumps_params={"ensure_ascii": False})
