@@ -254,7 +254,7 @@ def user_sign(request):
                             json_dumps_params={"ensure_ascii": False})
 
     # 6、最后判断当前时间发布会是否已开始
-    etime = str(result.start_time).split('.')[0]
+    etime = str(result.start_time)[:19]
     # 根据fmt的格式把一个时间字符串解析为时间元组
     timeArray = time.strptime(etime, '%Y-%m-%d %H:%M:%S')
     # 接受时间元组并返回时间戳
