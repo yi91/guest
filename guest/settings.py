@@ -120,7 +120,13 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
+'''
+TIME_ZONE代表使用的时区，默认为UTC
+USE_TZ 字段是UTC时间的开关。
+当 USE_TZ = True时，系统采用UTC时间；
+当 USE_TZ = False时，采用本地时区
+'''
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
