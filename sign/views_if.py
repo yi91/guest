@@ -126,26 +126,26 @@ def add_guest(request):
                             json_dumps_params={"ensure_ascii": False})
 
     # 3、所有参数都正常，先按id执行查询发布会是否已经存在
-    result = Event.objects.filter(id=eid)[0]
+    result = Event.objects.filter(id=eid)
     # 如果查不到结果
     if not result:
         return JsonResponse({'status': 10022, 'message': '嘉宾参加的发布会不存在'},
                             json_dumps_params={"ensure_ascii": False})
 
     # 4、存在，判断发布会状态，1 代表发布会可用，0 不可用
-    if not result.status:
+    if not result[0].status:
         return JsonResponse({'status': 10023, 'message': '嘉宾不允许参加 %s （不可用）' % result.name},
                             json_dumps_params={"ensure_ascii": False})
 
     # 5、id和status都没问题，判断人数限制问题，发布会实际参加人数 < 发布会limit
     guests = Guest.objects.filter(event_id=eid)
 
-    if len(guests) >= result.limit:
+    if len(guests) >= result[0].limit:
         return JsonResponse({'status': 10024, 'message': '发布会人数已达上限 %s ，添加失败' % result.limit},
                             json_dumps_params={"ensure_ascii": False})
 
     # 6、最后判断当前时间发布会是否已开始
-    etime = str(result.start_time).split('.')[0]
+    etime = str(result[0].start_time)[:19]
     # 根据fmt的格式把一个时间字符串解析为时间元组
     timeArray = time.strptime(etime, '%Y-%m-%d %H:%M:%S')
     # 接受时间元组并返回时间戳
@@ -271,17 +271,18 @@ def user_sign(request):
                             json_dumps_params={"ensure_ascii": False})
 
     # 7、时间满足条件时，检查手机号是否存在
-    g = Guest.objects.filter(event_id=eid, phone=phone)[0]
+    g = Guest.objects.filter(event_id=eid, phone=phone)
     if not g:
         return JsonResponse({'status': 10025, 'message': '该手机号不存在'},
                             json_dumps_params={"ensure_ascii": False})
 
     # 9、发布会和手机号都没问题的时候，检查是否已经签到过
-    if not g.sign:
+    if g[0].sign:
         return JsonResponse({'status': 10026, 'message': '该嘉宾已经签到过'},
                             json_dumps_params={"ensure_ascii": False})
 
     # 如果都没问题，就执行签到，这时候get不会报错，所以不用try
-    g.update(sign='1')
-    return JsonResponse({'status': 200, 'message': '嘉宾 %s 签到成功' % g.realname},
+    g[0].sign = True
+    g[0].save()
+    return JsonResponse({'status': 200, 'message': '嘉宾 %s 签到成功' % g[0].realname},
                         json_dumps_params={"ensure_ascii": False})
